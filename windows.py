@@ -4,7 +4,6 @@ import tkintermapview
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 
-
 def buy_window(parent):
     """
     Creates the Buy Window, attached to 'parent'.
@@ -68,6 +67,39 @@ def home_window(parent):
         parent, text="Homeez - Toronto", font=("Arial Black", 30), text_color="#ff8c69", bg_color="black"
     )
     title_label.place(relx=0.5, rely=0.05, anchor="center")  # Center at the top
+
+    # Add a search entry and button at the bottom
+
+    search_frame = ctk.CTkFrame(parent, fg_color="transparent", height=40)
+    search_frame.place(relx=0.5, rely=0.95, anchor="center", relwidth=0.5)
+
+    search_entry = ctk.CTkEntry(
+        search_frame, placeholder_text="Enter an address", corner_radius=10, width=400
+    )
+    search_entry.pack(side="bottom", padx=10, pady=5)
+
+    geolocator = Nominatim(user_agent="homeez_map_app_search")
+    geocode = RateLimiter(geolocator.geocode, min_delay_seconds=0.1)
+
+    def search_address():
+        address = search_entry.get().strip()
+        if not address:
+            print("No address entered.")
+            return
+
+        location = geocode(address)
+        if location:
+            lat, lon = location.latitude, location.longitude
+            map_window(parent, lat, lon)
+        else:
+            print(f"Could not geocode address: {address}")
+
+    search_button = ctk.CTkButton(
+        search_frame, text="Search", corner_radius=10, width=80,
+        fg_color="#ff8c69", hover_color="#ffa07a", text_color="black",
+        command=search_address
+    )
+    search_button.pack(side="bottom", padx=5,pady=5)
 
 
 def map_window(parent, lat=None, lon=None):
@@ -142,12 +174,13 @@ def open_property_details(parent, property_id,db):
         return
     prop_data = doc.to_dict()
 
-    detail_win = ctk.CTkToplevel(parent)
-    detail_win.title(prop_data.get("propertyName", "No Name"))
-    detail_win.geometry("600x500")
+    for widget in parent.winfo_children():
+        widget.destroy()
+
+    parent.pack_propagate(False)
 
     # Title
-    title_label = ctk.CTkLabel(detail_win, text=prop_data["propertyName"], font=("Arial", 18, "bold"))
+    title_label = ctk.CTkLabel(parent, text=prop_data["propertyName"], font=("Arial", 18, "bold"))
     title_label.pack(pady=10)
 
     # Load a larger image if available
@@ -157,7 +190,7 @@ def open_property_details(parent, property_id,db):
             img = Image.open(image_path)
             img = img.resize((400, 300), resample=Image.Resampling.LANCZOS)
             img_tk = ImageTk.PhotoImage(img)
-            img_label = ctk.CTkLabel(detail_win, image=img_tk, text="")
+            img_label = ctk.CTkLabel(parent, image=img_tk, text="")
             img_label.image = img_tk
             img_label.pack(pady=10)
         except Exception as e:
@@ -180,7 +213,7 @@ def open_property_details(parent, property_id,db):
         f"Type: {prop_data.get('propertyType', 'N/A')}\n"
         f"Agent: {agent_name}"
     )
-    info_label = ctk.CTkLabel(detail_win, text=info_text, justify="left")
+    info_label = ctk.CTkLabel(parent, text=info_text, justify="left")
     info_label.pack(pady=5)
 
 ##############################################################################
@@ -215,8 +248,11 @@ def browse_properties_window(parent,db):
         properties.append(prop_data)
 
     # Create a scrollable frame
-    scroll_frame = ctk.CTkScrollableFrame(parent, width=780, height=550)
-    scroll_frame.pack(padx=10, pady=10, fill="both", expand=True)
+    scroll_frame = ctk.CTkScrollableFrame(parent, width=(parent.winfo_width()*0.15), height=550)
+    scroll_frame.pack(side="left", padx=10, pady=10, fill="y")
+
+    detail_frame = ctk.CTkFrame(parent, height=550, width=(parent.winfo_width()*0.85))
+    detail_frame.pack(side="right", padx=10, pady=10, fill="both",ipadx=20,ipady=20)
 
     row_index = 0
     for prop in properties:
@@ -264,7 +300,7 @@ def browse_properties_window(parent,db):
         def open_details(p=prop):
             prop_id = p.get("propertyId")
             if prop_id:
-                open_property_details(parent, prop_id,db)
+                open_property_details(detail_frame, prop_id,db)
             else:
                 print("No propertyId found for this listing.")
 
@@ -272,7 +308,7 @@ def browse_properties_window(parent,db):
         details_button.pack(anchor="w")
 
         # A separator line
-        sep = ctk.CTkLabel(info_frame, text="—" * 60)
+        sep = ctk.CTkLabel(info_frame, text="—" * 20)
         sep.pack(anchor="w", pady=(5, 0))
 
 
@@ -280,16 +316,20 @@ def browse_properties_window(parent,db):
 # BROWSE AGENTS WINDOW (for "Message" button)
 ##############################################################################
 
-def open_chat_window(parent, agent_id):
+def open_chat_window(parent, agent_id, agent_name):
     """
     A placeholder function to open a chat window with the specified agent.
     """
-    chat_win = ctk.CTkToplevel(parent)
-    chat_win.title(f"Chat with {agent_id}")
-    chat_win.geometry("400x300")
+    for widget in parent.winfo_children():
+        widget.destroy()
+
+    parent.pack_propagate(False)
 
     # Example UI
-    ctk.CTkLabel(chat_win, text=f"Chat with Agent {agent_id}", font=("Arial", 16)).pack(pady=10)
+    # ctk.CTkLabel(parent, text=f"Chat with Agent {agent_id}", font=("Arial", 16)).pack(pady=10)
+    from message import chatroom_window
+    chatroom_window(parent, agent_id, agent_name) #temp chat system, doesnt act work...
+    
 
     # You can integrate your existing message.py logic here, or adapt it.
 
@@ -309,8 +349,12 @@ def browse_agents_window(parent,db):
         agents.append(doc.to_dict())
 
     # Create a scrollable frame
-    scroll_frame = ctk.CTkScrollableFrame(parent, width=780, height=550)
-    scroll_frame.pack(padx=10, pady=10, fill="both", expand=True)
+    # Create a scrollable frame
+    scroll_frame = ctk.CTkScrollableFrame(parent, width=(parent.winfo_width()*0.15), height=550)
+    scroll_frame.pack(side="left", padx=10, pady=10, fill="y")
+
+    detail_frame = ctk.CTkFrame(parent, height=550, width=(parent.winfo_width()*0.85))
+    detail_frame.pack(side="right", padx=10, pady=10, fill="both",ipadx=20,ipady=20)
 
     row_index = 0
     for agent in agents:
@@ -347,11 +391,11 @@ def browse_agents_window(parent,db):
 
         # "Message Now" button
         def message_now(a=agent):
-            open_chat_window(parent, a["agentId"])
+            open_chat_window(detail_frame, a["agentId"], a["agentName"])
 
         msg_button = ctk.CTkButton(info_frame, text="Message Now", command=message_now)
         msg_button.pack(anchor="w", pady=5)
 
         # Separator line
-        sep = ctk.CTkLabel(info_frame, text="—" * 60)
+        sep = ctk.CTkLabel(info_frame, text="—" * 20)
         sep.pack(anchor="w", pady=(5, 0))

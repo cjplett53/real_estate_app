@@ -115,8 +115,8 @@ root = ctk.CTk()
 root.title("Homeez - Toronto")
 root.geometry("1200x800")
 
-nav_bar = ctk.CTkFrame(root, width=100, fg_color="black")
-nav_bar.pack(fill="y", side="left")
+nav_bar = ctk.CTkFrame(root, width=80, fg_color="black")
+nav_bar.pack(fill="y", side="left", padx=5, pady=5)
 
 # background = ctk.CTkFrame(root)
 # background.pack(fill="both",expand=True)
@@ -124,7 +124,8 @@ nav_bar.pack(fill="y", side="left")
 main_content = ctk.CTkFrame(root) 
 main_content.pack(fill="both",expand=True)
 
-# home_window(root)
+# Initial window focusd on howe window
+home_window(main_content)
 
 hide_button = ctk.CTkButton(
     nav_bar, text="<<<", corner_radius=10, width=100, height=20,
@@ -186,44 +187,5 @@ sign_in_button = ctk.CTkButton(
     fg_color="#ff8c69", hover_color="#ffa07a", text_color="black"
 )
 sign_in_button.pack(padx=5, pady=5)
-
-
-
-# bottom_frame = ctk.CTkFrame(root, height=100, fg_color="black")
-# bottom_frame.pack(fill="x")
-
-# search_frame = ctk.CTkFrame(bottom_frame, corner_radius=10, fg_color="black", height=40)
-# search_frame.pack(pady=20)
-
-# search_entry = ctk.CTkEntry(
-#     search_frame, placeholder_text="Enter an address", corner_radius=10, width=400
-# )
-# search_entry.pack(side="left", padx=10, pady=5)
-
-# from geopy.geocoders import Nominatim
-# from geopy.extra.rate_limiter import RateLimiter
-
-# geolocator = Nominatim(user_agent="homeez_map_app_search")
-# geocode = RateLimiter(geolocator.geocode, min_delay_seconds=0.1)
-
-# def search_address():
-#     address = search_entry.get().strip()
-#     if not address:
-#         print("No address entered.")
-#         return
-
-#     location = geocode(address)
-#     if location:
-#         lat, lon = location.latitude, location.longitude
-#         map_window(root, lat, lon)
-#     else:
-#         print(f"Could not geocode address: {address}")
-
-# search_button = ctk.CTkButton(
-#     search_frame, text="Search", corner_radius=10, width=80,
-#     fg_color="#ff8c69", hover_color="#ffa07a", text_color="black",
-#     command=search_address
-# )
-# search_button.pack(side="left", padx=5)
 
 root.mainloop()

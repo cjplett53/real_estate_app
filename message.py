@@ -40,22 +40,30 @@ def message_window(parent):
     message_button.pack(pady=10)
 
 
-def chatroom_window(parent, username):
+def chatroom_window(parent, username, agent_name):
     """
     This window is a full-screen chatroom with the specified user.
     Temporarily stores messages (no DB).
     """
-    chat_window = ctk.CTkToplevel(parent)
-    chat_window.title(f"Chatroom with {username}")
-    chat_window.geometry("1200x800")  # Same size as main window
 
-    # Make sure it's in front
-    chat_window.transient(parent)
-    chat_window.grab_set()
-    chat_window.lift(parent)
-    chat_window.focus_force()
+    for widget in parent.winfo_children():
+        widget.destroy()
 
-    user_label = ctk.CTkLabel(chat_window, text=f"Chat with: {username}", font=("Arial Black", 24))
+    parent.pack_propagate(False)
+
+    chat_window = parent
+
+    # chat_window = ctk.CTkToplevel(parent)
+    # chat_window.title(f"Chatroom with {username}")
+    # chat_window.geometry("1200x800")  # Same size as main window
+
+    # # Make sure it's in front
+    # chat_window.transient(parent)
+    # chat_window.grab_set()
+    # chat_window.lift(parent)
+    # chat_window.focus_force()
+
+    user_label = ctk.CTkLabel(chat_window, text=f"Chat with: {agent_name} [{username}]", font=("Arial Black", 24))
     user_label.pack(pady=20)
 
     # Frame for chat messages
@@ -70,8 +78,8 @@ def chatroom_window(parent, username):
     entry_frame = ctk.CTkFrame(chat_window)
     entry_frame.pack(side="bottom", fill="x", pady=10)
 
-    message_entry = ctk.CTkEntry(entry_frame, placeholder_text="Type a message...", width=800)
-    message_entry.pack(side="left", padx=10)
+    message_entry = ctk.CTkEntry(entry_frame, placeholder_text="Type a message...")
+    message_entry.pack(side="left", padx=5, pady=5, fill="x", expand=True)
 
     def send_message():
         text = message_entry.get().strip()
