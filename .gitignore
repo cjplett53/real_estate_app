@@ -1,6 +1,7 @@
 __pycache__/
 
 # Virtual env
+env1
 venv
 
 # Enviornment Variable
