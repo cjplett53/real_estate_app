@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package realestate;
+
+message Property {
+  string property_id = 1;
+  string property_name = 2;
+  string property_type = 3;     // "buy", "rent", or "sell"
+  string property_info = 4;
+  string price_lease_rent = 5;  // We store Firestore numbers as string over gRPC
+  string location = 6;
+  string image_path = 7;
+  string agent_id = 8;
+}
+
+message ListPropertiesRequest {}
+message ListPropertiesResponse {
+  repeated Property properties = 1;
+}
+
+message GetPropertyRequest {
+  string property_id = 1;
+}
+message GetPropertyResponse {
+  Property property = 1;
+}
+
+// For creating or updating a property
+message CreatePropertyRequest {
+  Property property = 1;
+}
+message CreatePropertyResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Agents
+message Agent {
+  string agent_id = 1;
+  string agent_name = 2;
+  string agent_info = 3;
+  string agent_contact_info = 4;
+  string agent_image_path = 5;
+}
+
+message ListAgentsRequest {}
+message ListAgentsResponse {
+  repeated Agent agents = 1;
+}
+
+message GetAgentRequest {
+  string agent_id = 1;
+}
+message GetAgentResponse {
+  Agent agent = 1;
+}
+
+message CreateAgentRequest {
+  Agent agent = 1;
+}
+message CreateAgentResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Optional messaging
+message AddMessageRequest {
+  string customer_id = 1;
+  string agent_id = 2;
+  string message = 3;
+}
+message AddMessageResponse {
+  bool success = 1;
+  string info = 2;
+}
+
+service RealEstateService {
+  // Properties
+  rpc ListProperties (ListPropertiesRequest) returns (ListPropertiesResponse);
+  rpc GetProperty (GetPropertyRequest) returns (GetPropertyResponse);
+  rpc CreateProperty (CreatePropertyRequest) returns (CreatePropertyResponse);
+
+  // Agents
+  rpc ListAgents (ListAgentsRequest) returns (ListAgentsResponse);
+  rpc GetAgent (GetAgentRequest) returns (GetAgentResponse);
+  rpc CreateAgent (CreateAgentRequest) returns (CreateAgentResponse);
+
+}

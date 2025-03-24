@@ -3,40 +3,36 @@ import real_estate_pb2
 import real_estate_pb2_grpc
 from PIL import Image, ImageTk
 
-def buy_window(parent, stub):
+def rent_window(parent, stub):
     """
-    Creates the Buy Window and shows all 'buy' properties from Firestore via gRPC.
+    Shows all 'rent' properties from Firestore via gRPC.
     """
 
-    # Clear any existing widgets in the parent
+    # Clear any existing widgets
     for widget in parent.winfo_children():
         widget.destroy()
 
-    # Make sure the parent doesn't shrink
     parent.pack_propagate(False)
 
-    title_label = ctk.CTkLabel(parent, text="Buy a Property", font=("Arial Black", 20))
+    title_label = ctk.CTkLabel(parent, text="Rent a Property", font=("Arial Black", 20))
     title_label.pack(pady=20)
 
-    # Call gRPC to list ALL properties
+    # gRPC: List all properties
     response = stub.ListProperties(real_estate_pb2.ListPropertiesRequest())
     all_properties = response.properties
 
-    # Filter for property_type == "buy"
-    buy_props = [p for p in all_properties if (p.property_type or "").lower() == "buy"]
+    # Filter for property_type == "rent"
+    rent_props = [p for p in all_properties if (p.property_type or "").lower() == "rent"]
 
-    # Create a scrollable frame to hold the results
     scroll_frame = ctk.CTkScrollableFrame(parent, width=800, height=600)
     scroll_frame.pack(expand=True, fill="both", padx=10, pady=10)
 
     row_index = 0
-    for prop in buy_props:
-        # Outer frame for each property
+    for prop in rent_props:
         frame = ctk.CTkFrame(scroll_frame)
         frame.grid(row=row_index, column=0, padx=10, pady=10, sticky="w")
         row_index += 1
 
-        # Attempt to load the property's image
         if prop.image_path:
             try:
                 img = Image.open(prop.image_path)
@@ -48,7 +44,7 @@ def buy_window(parent, stub):
             except Exception as e:
                 print(f"Could not load image {prop.image_path}: {e}")
 
-        # Handle the numeric Firestore field stored as a string over gRPC
+        # Convert numeric Firestore field (sent as string) safely
         price_str = prop.price_lease_rent or "0"
 
         info_str = (
