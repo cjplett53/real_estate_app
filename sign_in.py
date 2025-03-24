@@ -1,9 +1,6 @@
 import customtkinter as ctk
 
 def sign_in_window(parent):
-    """
-    Purely local sign-in (no DB creation).
-    """
     for widget in parent.winfo_children():
         widget.destroy()
 
@@ -23,10 +20,9 @@ def sign_in_window(parent):
     pass_entry.pack(pady=5)
 
     def do_sign_in():
-        # purely local
+        # purely local until firebase login is implemented
         print("Username:", user_entry.get())
         print("Password:", pass_entry.get())
-        # You could add local validation or simply close the window
         parent.pack_forget()
 
     sign_button = ctk.CTkButton(parent, text="Sign In", corner_radius=10, width=100, command=do_sign_in)

@@ -1,3 +1,5 @@
+# Run this file
+
 import customtkinter as ctk
 from PIL import Image, ImageTk
 
@@ -6,7 +8,7 @@ from windows import home_window
 from buy import buy_window
 from rent import rent_window
 from sell import sell_window
-from sign_in import sign_in_window
+from sign_in import sign_in_window  
 from message import message_window
 from map_window import map_window
 
@@ -16,11 +18,12 @@ import real_estate_pb2_grpc
 import subprocess
 import sys
 
-# Start the gRPC server as a subprocess so that its lifetime is tied to our client
+# Start the gRPC server as a subprocess so it can also be killed with the application
 server_process = subprocess.Popen([sys.executable, "grpc_server.py"])
 
 def main():
     # Create a gRPC channel and stub to connect to the server
+    # Verify matches the one in grpc_server.py
     channel = grpc.insecure_channel('localhost:4444')
     stub = real_estate_pb2_grpc.RealEstateServiceStub(channel)
 
@@ -37,7 +40,7 @@ def main():
     main_content = ctk.CTkFrame(root)
     main_content.pack(fill="both", expand=True)
 
-    # Initially load the home window (with background image and title)
+    # Initially load the home window
     home_window(main_content)
 
     hide_button = ctk.CTkButton(
@@ -53,7 +56,7 @@ def main():
     )
     home_button.pack(padx=5, pady=5)
 
-    # "Buy" button (displays properties for buy via gRPC)
+    # Buy button (displays properties for purchase via gRPC)
     buy_button = ctk.CTkButton(
         nav_bar, text="Buy", corner_radius=10, width=100, height=40,
         fg_color="#ff8c69", hover_color="#ffa07a", text_color="black",
@@ -61,7 +64,7 @@ def main():
     )
     buy_button.pack(padx=5, pady=5)
 
-    # "Rent" button (displays properties for rent via gRPC)
+    # Rent button (displays properties for rent via gRPC)
     rent_button = ctk.CTkButton(
         nav_bar, text="Rent", corner_radius=10, width=100, height=40,
         fg_color="#ff8c69", hover_color="#ffa07a", text_color="black",
@@ -69,7 +72,7 @@ def main():
     )
     rent_button.pack(padx=5, pady=5)
 
-    # "Sell" button (allows user to create a new property via gRPC)
+    # Sell button (Stores to DB through gRPC)
     sell_button = ctk.CTkButton(
         nav_bar, text="Sell", corner_radius=10, width=100, height=40,
         fg_color="#ff8c69", hover_color="#ffa07a", text_color="black",
@@ -77,15 +80,15 @@ def main():
     )
     sell_button.pack(padx=5, pady=5)
 
-    # "Map" button (opens a local map window)
+    # Map button (utilizes gRPC for showing properties)
     map_btn = ctk.CTkButton(
         nav_bar, text="Map", corner_radius=10, width=100, height=40,
         fg_color="#ff8c69", hover_color="#ffa07a", text_color="black",
-        command=lambda: map_window(main_content)
+        command=lambda: map_window(main_content, stub)
     )
     map_btn.pack(padx=5, pady=5)
 
-    # "Message" button (opens the message window)
+    # Message button
     msg_button = ctk.CTkButton(
         nav_bar, text="Message", corner_radius=10, width=100, height=40,
         fg_color="#ff8c69", hover_color="#ffa07a", text_color="black",
@@ -93,7 +96,7 @@ def main():
     )
     msg_button.pack(padx=5, pady=5)
 
-    # "Sign In" button (local-only, no gRPC DB operation)
+    # Sign in button
     sign_in_button = ctk.CTkButton(
         nav_bar, text="Sign In", corner_radius=10, width=100, height=40,
         fg_color="#ff8c69", hover_color="#ffa07a", text_color="black",
@@ -101,7 +104,7 @@ def main():
     )
     sign_in_button.pack(padx=5, pady=5)
 
-    # When closing the window, also terminate the gRPC server subprocess.
+    # When closing the window also terminate the gRPC server subprocess
     def on_close():
         try:
             server_process.terminate()

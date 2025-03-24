@@ -8,12 +8,12 @@ def home_window(parent):
 
     parent.pack_propagate(False)
 
-    # Load a background image
+    # Load start image
     image_path = "start_image.jpg"
     try:
         image = Image.open(image_path)
     except Exception as e:
-        print(f"Could not load background image {image_path}: {e}")
+        print(f"Could not load home screen image {image_path}: {e}")
         image = None
 
     if image:

@@ -1,9 +1,7 @@
 import customtkinter as ctk
 
+# Add messages to DB
 def message_window(parent):
-    """
-    Enter a username to message. Closes and opens chatroom. (Local only)
-    """
     for widget in parent.winfo_children():
         widget.destroy()
 

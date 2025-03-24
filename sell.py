@@ -1,14 +1,9 @@
 import customtkinter as ctk
 import real_estate_pb2
 import real_estate_pb2_grpc
+import random
 
 def sell_window(parent, stub):
-    """
-    Allows a user to list a new property in Firestore via gRPC.
-    The user must enter all mandatory fields: Property Name, Price, Location,
-    and choose a Property Type ("buy" or "rent") so that the listing appears under the correct screen.
-    """
-
     # Clear old content
     for widget in parent.winfo_children():
         widget.destroy()
@@ -29,7 +24,7 @@ def sell_window(parent, stub):
     price_entry = ctk.CTkEntry(parent, placeholder_text="Price or Monthly Rent", width=200)
     price_entry.pack(pady=5)
 
-    # Location Entry (new field)
+    # Location Entry
     location_entry = ctk.CTkEntry(parent, placeholder_text="Location", width=200)
     location_entry.pack(pady=5)
 
@@ -41,13 +36,11 @@ def sell_window(parent, stub):
     type_dropdown.pack(pady=5)
 
     def do_list_property():
-        # Gather user input
         prop_name = name_entry.get().strip()
         prop_price = price_entry.get().strip()
         location = location_entry.get().strip()
         chosen_type = property_type_var.get().strip()  # "buy" or "rent"
 
-        # Mandatory fields check
         if not prop_name:
             print("Error: Property name is required.")
             return
@@ -64,22 +57,27 @@ def sell_window(parent, stub):
         # Derive a property_id from the property name
         prop_id = prop_name.lower().replace(" ", "_")
 
-        # Create a gRPC request to list the property with the provided details
+        # Select a random agent from the DB (may crash sell if no agents in DB)
+        agent_response = stub.ListAgents(real_estate_pb2.ListAgentsRequest())
+        agents = agent_response.agents
+        random_agent = random.choice(agents)
+        random_agent_id = random_agent.agent_id
+
+        # Create a gRPC request to sell the property with the provided details
         req = real_estate_pb2.CreatePropertyRequest(
             property=real_estate_pb2.Property(
                 property_id=prop_id,
                 property_name=prop_name,
-                property_type=chosen_type,  # user-selected: "buy" or "rent"
-                property_info=f"User-submitted property for {chosen_type}",
+                property_type=chosen_type,
+                property_info="",   # Need to add this
                 price_lease_rent=prop_price,
-                location=location,  # use the user-entered location
-                image_path="",      # optional image path
-                agent_id=""
+                location=location,
+                image_path="",      # image path - check how DB stores images
+                agent_id=random_agent_id
             )
         )
         resp = stub.CreateProperty(req)
         print(resp.message)
 
-    # Button to submit the form
     create_button = ctk.CTkButton(parent, text="List Property", corner_radius=10, width=160, command=do_list_property)
     create_button.pack(pady=10)

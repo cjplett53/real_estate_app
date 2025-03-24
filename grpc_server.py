@@ -23,7 +23,7 @@ except ValueError:
 db = firestore.client()
 
 class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
-
+    # Retrieves all property documents from DB
     def ListProperties(self, request, context):
         response = real_estate_pb2.ListPropertiesResponse()
         try:
@@ -35,6 +35,8 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
                 prop.property_name = str(p.get("propertyName", ""))
                 prop.property_type = str(p.get("propertyType", ""))
                 prop.property_info = str(p.get("propertyInfo", ""))
+                
+                # Convert price to string
                 price_val = p.get("priceLeaseRent", 0)
                 prop.price_lease_rent = str(price_val)
                 prop.location = str(p.get("location", ""))
@@ -45,6 +47,7 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             traceback.print_exc()
         return response
 
+    # Retrieves a single property by ID
     def GetProperty(self, request, context):
         try:
             doc = db.collection("properties").document(request.property_id).get()
@@ -67,6 +70,7 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             traceback.print_exc()
             return real_estate_pb2.GetPropertyResponse()
 
+    # Creates properties and adds to DB (Need to add proper images and agent IDs)
     def CreateProperty(self, request, context):
         prop = request.property
         try:
@@ -95,6 +99,7 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             traceback.print_exc()
             return real_estate_pb2.CreatePropertyResponse(success=False, message=str(e))
 
+    # Retrieve agents from DB
     def ListAgents(self, request, context):
         response = real_estate_pb2.ListAgentsResponse()
         try:
@@ -112,6 +117,7 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             traceback.print_exc()
         return response
 
+    # Retrieve a single agent based on ID
     def GetAgent(self, request, context):
         try:
             doc = db.collection("agents").document(request.agent_id).get()
@@ -130,6 +136,7 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             print("Error in GetAgent:", e)
             traceback.print_exc()
             return real_estate_pb2.GetAgentResponse()
+
 
     def CreateAgent(self, request, context):
         ag = request.agent
@@ -151,27 +158,9 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             traceback.print_exc()
             return real_estate_pb2.CreateAgentResponse(success=False, message=str(e))
 
-    def AddMessage(self, request, context):
-        try:
-            data = {
-                "customerId": request.customer_id,
-                "agentId": request.agent_id,
-                "message": request.message
-            }
-            db.collection("customer_agent_messaging_history").document().set(data)
-            return real_estate_pb2.AddMessageResponse(
-                success=True,
-                info="Message added"
-            )
-        except Exception as e:
-            print("Error in AddMessage:", e)
-            traceback.print_exc()
-            return real_estate_pb2.AddMessageResponse(success=False, info=str(e))
-
-def serve():
+def gRPC_server():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     real_estate_pb2_grpc.add_RealEstateServiceServicer_to_server(RealEstateServiceServicer(), server)
-    # Bind using IPv4 address to avoid potential IPv6 issues:
     server.add_insecure_port("localhost:4444")
     server.start()
     print("gRPC server running on port 4444.")
@@ -179,7 +168,7 @@ def serve():
 
 if __name__ == "__main__":
     try:
-        serve()
+        gRPC_server()
     except Exception as e:
         print("Server encountered an error:", e)
         traceback.print_exc()

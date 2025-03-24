@@ -17,16 +17,17 @@ def rent_window(parent, stub):
     title_label = ctk.CTkLabel(parent, text="Rent a Property", font=("Arial Black", 20))
     title_label.pack(pady=20)
 
-    # gRPC: List all properties
+    # call gRPC to list all properties
     response = stub.ListProperties(real_estate_pb2.ListPropertiesRequest())
     all_properties = response.properties
 
-    # Filter for property_type == "rent"
+    # Filter for property_type == "rent" case insensitive
     rent_props = [p for p in all_properties if (p.property_type or "").lower() == "rent"]
 
     scroll_frame = ctk.CTkScrollableFrame(parent, width=800, height=600)
     scroll_frame.pack(expand=True, fill="both", padx=10, pady=10)
 
+    # Property frame
     row_index = 0
     for prop in rent_props:
         frame = ctk.CTkFrame(scroll_frame)
@@ -44,7 +45,6 @@ def rent_window(parent, stub):
             except Exception as e:
                 print(f"Could not load image {prop.image_path}: {e}")
 
-        # Convert numeric Firestore field (sent as string) safely
         price_str = prop.price_lease_rent or "0"
 
         info_str = (

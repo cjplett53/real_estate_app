@@ -7,7 +7,7 @@ message Property {
   string property_name = 2;
   string property_type = 3;     // "buy", "rent", or "sell"
   string property_info = 4;
-  string price_lease_rent = 5;  // We store Firestore numbers as string over gRPC
+  string price_lease_rent = 5;  // We store numbers as string over gRPC (converted in grpc_server.py)
   string location = 6;
   string image_path = 7;
   string agent_id = 8;
@@ -63,24 +63,13 @@ message CreateAgentResponse {
   string message = 2;
 }
 
-// Optional messaging
-message AddMessageRequest {
-  string customer_id = 1;
-  string agent_id = 2;
-  string message = 3;
-}
-message AddMessageResponse {
-  bool success = 1;
-  string info = 2;
-}
-
 service RealEstateService {
   // Properties
   rpc ListProperties (ListPropertiesRequest) returns (ListPropertiesResponse);
   rpc GetProperty (GetPropertyRequest) returns (GetPropertyResponse);
   rpc CreateProperty (CreatePropertyRequest) returns (CreatePropertyResponse);
 
-  // Agents
+  // Agents (unused)
   rpc ListAgents (ListAgentsRequest) returns (ListAgentsResponse);
   rpc GetAgent (GetAgentRequest) returns (GetAgentResponse);
   rpc CreateAgent (CreateAgentRequest) returns (CreateAgentResponse);
