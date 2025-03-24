@@ -64,6 +64,11 @@ class RealEstateServiceStub(object):
                 request_serializer=real__estate__pb2.CreateAgentRequest.SerializeToString,
                 response_deserializer=real__estate__pb2.CreateAgentResponse.FromString,
                 _registered_method=True)
+        self.getUser = channel.unary_unary(
+                '/realestate.RealEstateService/getUser',
+                request_serializer=real__estate__pb2.getUserRequest.SerializeToString,
+                response_deserializer=real__estate__pb2.getUserResponse.FromString,
+                _registered_method=True)
 
 
 class RealEstateServiceServicer(object):
@@ -89,7 +94,7 @@ class RealEstateServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def ListAgents(self, request, context):
-        """Agents
+        """Agents (unused)
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -103,6 +108,13 @@ class RealEstateServiceServicer(object):
 
     def CreateAgent(self, request, context):
         """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def getUser(self, request, context):
+        """login
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -139,6 +151,11 @@ def add_RealEstateServiceServicer_to_server(servicer, server):
                     servicer.CreateAgent,
                     request_deserializer=real__estate__pb2.CreateAgentRequest.FromString,
                     response_serializer=real__estate__pb2.CreateAgentResponse.SerializeToString,
+            ),
+            'getUser': grpc.unary_unary_rpc_method_handler(
+                    servicer.getUser,
+                    request_deserializer=real__estate__pb2.getUserRequest.FromString,
+                    response_serializer=real__estate__pb2.getUserResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -303,6 +320,33 @@ class RealEstateService(object):
             '/realestate.RealEstateService/CreateAgent',
             real__estate__pb2.CreateAgentRequest.SerializeToString,
             real__estate__pb2.CreateAgentResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def getUser(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/realestate.RealEstateService/getUser',
+            real__estate__pb2.getUserRequest.SerializeToString,
+            real__estate__pb2.getUserResponse.FromString,
             options,
             channel_credentials,
             insecure,

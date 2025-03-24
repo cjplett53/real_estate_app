@@ -1,6 +1,7 @@
 import customtkinter as ctk
+import real_estate_pb2
 
-def sign_in_window(parent):
+def sign_in_window(parent, stub):
     for widget in parent.winfo_children():
         widget.destroy()
 
@@ -21,9 +22,13 @@ def sign_in_window(parent):
 
     def do_sign_in():
         # purely local until firebase login is implemented
-        print("Username:", user_entry.get())
-        print("Password:", pass_entry.get())
-        parent.pack_forget()
+        # print("Username:", user_entry.get())
+        # print("Password:", pass_entry.get())
+
+        #verify and reterive user data
+        response = stub.getUser(real_estate_pb2.getUserRequest(username=user_entry.get(), password=pass_entry.get()))
+        user = response
+        print(user)
 
     sign_button = ctk.CTkButton(parent, text="Sign In", corner_radius=10, width=100, command=do_sign_in)
     sign_button.pack(pady=10)

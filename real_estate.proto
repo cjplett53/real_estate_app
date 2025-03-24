@@ -63,6 +63,17 @@ message CreateAgentResponse {
   string message = 2;
 }
 
+message getUserRequest{
+  string username = 1;
+  string password = 2;  
+}
+message getUserResponse{
+  string status_message = 1;
+  string username = 2;
+  string password = 3;  
+  repeated string chatMessage = 4;
+}
+
 service RealEstateService {
   // Properties
   rpc ListProperties (ListPropertiesRequest) returns (ListPropertiesResponse);
@@ -74,4 +85,6 @@ service RealEstateService {
   rpc GetAgent (GetAgentRequest) returns (GetAgentResponse);
   rpc CreateAgent (CreateAgentRequest) returns (CreateAgentResponse);
 
+  // login
+  rpc getUser(getUserRequest) returns (getUserResponse);
 }

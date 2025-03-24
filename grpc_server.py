@@ -157,6 +157,30 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             print("Error in CreateAgent:", e)
             traceback.print_exc()
             return real_estate_pb2.CreateAgentResponse(success=False, message=str(e))
+        
+    # return valid user upon login
+    def getUser(self, request, context):
+        docs = db.collection("users").where("username", "==", request.username).get()
+
+        if not docs:
+            return real_estate_pb2.getUserResponse(status_message="Invalid credentials")
+
+        doc = docs[0].to_dict()
+        
+        if doc['username'] == request.username and request.password == doc['password']:
+            # Successful login
+            response = real_estate_pb2.getUserResponse(
+                username=request.username,
+                password=request.password,
+                chatMessage="",
+                status_message="Login Successful"
+            )
+        else:
+            # Failed login
+            response = real_estate_pb2.getUserResponse(
+                status_message="Invalid Password" 
+            )
+        return response
 
 def gRPC_server():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

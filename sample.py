@@ -100,7 +100,7 @@ def main():
     sign_in_button = ctk.CTkButton(
         nav_bar, text="Sign In", corner_radius=10, width=100, height=40,
         fg_color="#ff8c69", hover_color="#ffa07a", text_color="black",
-        command=lambda: sign_in_window(main_content)
+        command=lambda: sign_in_window(main_content, stub)
     )
     sign_in_button.pack(padx=5, pady=5)
 
