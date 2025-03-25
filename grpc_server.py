@@ -1,5 +1,6 @@
 import grpc
 from concurrent import futures
+from google.cloud.firestore_v1 import FieldFilter
 import firebase_admin
 from firebase_admin import credentials, firestore
 import traceback
@@ -157,13 +158,30 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             print("Error in CreateAgent:", e)
             traceback.print_exc()
             return real_estate_pb2.CreateAgentResponse(success=False, message=str(e))
-        
+
+    def addUser(self, request, context):
+        docs = db.collection("users").where(filter=FieldFilter("username", "==", request.username)).get()
+        if docs:
+            return real_estate_pb2.addUserResponse(status_message="Username already in use.")
+        new_user_data = {
+            "username": request.username,
+            "password": request.password,
+        }
+        try:
+            db.collection("users").add(new_user_data)
+            return real_estate_pb2.addUserResponse(
+                status_message="User created successfully",
+                username=request.username,
+            )
+        except Exception as e:
+            return real_estate_pb2.addUserResponse(status_message="Error creating user.")
+
     # return valid user upon login
     def getUser(self, request, context):
-        docs = db.collection("users").where("username", "==", request.username).get()
+        docs = db.collection("users").where(filter=FieldFilter("username", "==", request.username)).get()
 
         if not docs:
-            return real_estate_pb2.getUserResponse(status_message="Invalid credentials")
+            return real_estate_pb2.getUserResponse(status_message="Invalid credentials.")
 
         doc = docs[0].to_dict()
         
@@ -178,7 +196,7 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
         else:
             # Failed login
             response = real_estate_pb2.getUserResponse(
-                status_message="Invalid Password" 
+                status_message="Invalid password." 
             )
         return response
 

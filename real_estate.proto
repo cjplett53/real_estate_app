@@ -63,6 +63,16 @@ message CreateAgentResponse {
   string message = 2;
 }
 
+// Users
+message addUserRequest{
+  string username = 1;
+  string password = 2;
+}
+message addUserResponse{
+  string status_message = 1;
+  string username = 2;
+  string password = 3;
+}
 message getUserRequest{
   string username = 1;
   string password = 2;  
@@ -86,5 +96,6 @@ service RealEstateService {
   rpc CreateAgent (CreateAgentRequest) returns (CreateAgentResponse);
 
   // login
+  rpc addUser(addUserRequest) returns (addUserResponse);
   rpc getUser(getUserRequest) returns (getUserResponse);
 }
