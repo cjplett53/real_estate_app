@@ -88,8 +88,11 @@ def sign_in_window(parent, stub):
         response = stub.getUser(real_estate_pb2.getUserRequest(username=user_entry.get(), password=pass_entry.get()))
         user = response
         if user.username:
-            error_label = ctk.CTkLabel(parent, text="Log-In Successful.", text_color="green")
-            error_label.pack(pady=10)
+            if error_label:
+                error_label.configure(text="Log-In Successful.", text_color="green")
+            else:
+                error_label = ctk.CTkLabel(parent, text="Log-In Successful.", text_color="green")
+                error_label.pack(pady=10)
             #parent.after(2000, lambda: main())
         else:
             if error_label:
