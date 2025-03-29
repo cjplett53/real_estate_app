@@ -45,10 +45,7 @@ def map_window(parent, stub, lat=None, lon=None):
 
     # Retrieve all properties from the database via gRPC
     response = stub.ListProperties(real_estate_pb2.ListPropertiesRequest())
-    
-    # TEMPORARY: only include properties with IDs P001 and P006 as tests
-    test_ids = {"P001", "P006"}
-    filtered_properties = [p for p in response.properties if p.property_id in test_ids]
+    filtered_properties = response.properties
 
     # List to store marker objects along with their property info
     markers_list = []
@@ -99,7 +96,6 @@ def map_window(parent, stub, lat=None, lon=None):
             except Exception as e:
                 print("Error loading property image:", e)
         
-        # Build the property info
         info_text = (
             f"Name: {prop.property_name}\n"
             f"Info: {prop.property_info}\n"
@@ -110,33 +106,50 @@ def map_window(parent, stub, lat=None, lon=None):
         info_label = ctk.CTkLabel(info_frame, text=info_text, justify="left")
         info_label.pack(padx=5, pady=5)
 
-
     def on_marker_leave(event):
         nonlocal hover_popup
         if hover_popup:
             hover_popup.destroy()
             hover_popup = None
 
-    # place a marker on the map
     for prop in filtered_properties:
         address_full = prop.location
-        # Simplify the address by splitting by comma and joining first two parts (street address and city) (lazy solution)
         parts = address_full.split(',')
         if len(parts) >= 2:
             simple_address = parts[0].strip() + ", " + parts[1].strip()
         else:
             simple_address = address_full.strip()
 
-        # Marker label set to address
         label = simple_address
-
         location_obj = geocode(address_full)
         if location_obj:
             marker = map_widget.set_marker(location_obj.latitude, location_obj.longitude, text=label)
-            # print(marker.__dict__)
             marker.text_font = ("Arial", 14, "bold")
-            marker.text_color = "red"
             marker.text_bg_color = "white"
+
+            property_type = (prop.property_type or "").lower().strip()
+            if property_type == "buy":
+                marker.marker_color_circle = "#FF0000"
+                marker.marker_color_outside = "#FF0000"
+                if hasattr(marker, "polygon"):
+                    map_widget.canvas.itemconfig(marker.polygon, fill="#FF0000", outline="#FF0000")
+                if hasattr(marker, "big_circle"):
+                    map_widget.canvas.itemconfig(marker.big_circle, fill="#FF0000", outline="#FF0000")
+            elif property_type == "rent":
+                marker.marker_color_circle = "#0000FF"
+                marker.marker_color_outside = "#0000FF"
+                if hasattr(marker, "polygon"):
+                    map_widget.canvas.itemconfig(marker.polygon, fill="#0000FF", outline="#0000FF")
+                if hasattr(marker, "big_circle"):
+                    map_widget.canvas.itemconfig(marker.big_circle, fill="#0000FF", outline="#0000FF")
+            
+            # Text
+            marker.text_color = "black"
+            marker.set_text(marker.text)
+            if hasattr(marker, "canvas_text"):
+                map_widget.canvas.itemconfig(marker.canvas_text, fill="black")
+                # Raise the text above all marker elements
+                map_widget.canvas.tag_raise(marker.canvas_text)
 
             map_widget.canvas.tag_bind(
                 marker.big_circle,
@@ -148,7 +161,6 @@ def map_window(parent, stub, lat=None, lon=None):
                 "<Leave>",
                 on_marker_leave
             )
-            # Bind hover events to the marker text to increase hover range
             if hasattr(marker, "canvas_text"):
                 map_widget.canvas.tag_bind(
                     marker.canvas_text,
@@ -164,3 +176,10 @@ def map_window(parent, stub, lat=None, lon=None):
             markers_list.append((marker, prop))
         else:
             print(f"Warning: Geocoding failed for address: {address_full}")
+
+    # Raise all text after all markers are created/refreshed
+    def raise_all_text():
+        for marker, _ in markers_list:
+            if hasattr(marker, "canvas_text"):
+                map_widget.canvas.tag_raise(marker.canvas_text)
+    map_widget.canvas.after(200, raise_all_text)
