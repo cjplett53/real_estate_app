@@ -1,12 +1,15 @@
 import customtkinter as ctk
 from PIL import Image, ImageTk
 
-def home_window(parent):
+def home_window(parent,user):
     # Clear old stuff
     for widget in parent.winfo_children():
         widget.destroy()
 
     parent.pack_propagate(False)
+
+    print("Test: ",user)
+
 
     # Load start image
     image_path = "start_image.jpg"
@@ -36,8 +39,16 @@ def home_window(parent):
         # fallback
         ctk.CTkLabel(parent, text="Homeez - No Background Image", font=("Arial Black", 20)).pack(pady=20)
 
-    # Title label
+    if user:
+        greeting = ctk.CTkLabel(
+            parent, text=f"Welcome back, {user.username}!", font=("Arial Black", 30), text_color="#ff8c69"
+        )
+        greeting.place(relx=0.5, rely=0.9, anchor="center")
+
     title_label = ctk.CTkLabel(
-        parent, text="Homeez - Toronto", font=("Arial Black", 30), text_color="#ff8c69"
+        parent, text=f"Homeez - Toronto ", font=("Arial Black", 30), text_color="#ff8c69"
     )
     title_label.place(relx=0.5, rely=0.05, anchor="center")
+
+
+
