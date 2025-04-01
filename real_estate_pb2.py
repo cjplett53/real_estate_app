@@ -22,51 +22,68 @@ _runtime_version.ValidateProtobufRuntimeVersion(
 _sym_db = _symbol_database.Default()
 
 
+from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11real_estate.proto\x12\nrealestate\"\xb6\x01\n\x08Property\x12\x13\n\x0bproperty_id\x18\x01 \x01(\t\x12\x15\n\rproperty_name\x18\x02 \x01(\t\x12\x15\n\rproperty_type\x18\x03 \x01(\t\x12\x15\n\rproperty_info\x18\x04 \x01(\t\x12\x18\n\x10price_lease_rent\x18\x05 \x01(\t\x12\x10\n\x08location\x18\x06 \x01(\t\x12\x12\n\nimage_path\x18\x07 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x08 \x01(\t\"\x17\n\x15ListPropertiesRequest\"B\n\x16ListPropertiesResponse\x12(\n\nproperties\x18\x01 \x03(\x0b\x32\x14.realestate.Property\")\n\x12GetPropertyRequest\x12\x13\n\x0bproperty_id\x18\x01 \x01(\t\"=\n\x13GetPropertyResponse\x12&\n\x08property\x18\x01 \x01(\x0b\x32\x14.realestate.Property\"?\n\x15\x43reatePropertyRequest\x12&\n\x08property\x18\x01 \x01(\x0b\x32\x14.realestate.Property\":\n\x16\x43reatePropertyResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"w\n\x05\x41gent\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x12\n\nagent_name\x18\x02 \x01(\t\x12\x12\n\nagent_info\x18\x03 \x01(\t\x12\x1a\n\x12\x61gent_contact_info\x18\x04 \x01(\t\x12\x18\n\x10\x61gent_image_path\x18\x05 \x01(\t\"\x13\n\x11ListAgentsRequest\"7\n\x12ListAgentsResponse\x12!\n\x06\x61gents\x18\x01 \x03(\x0b\x32\x11.realestate.Agent\"#\n\x0fGetAgentRequest\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\"4\n\x10GetAgentResponse\x12 \n\x05\x61gent\x18\x01 \x01(\x0b\x32\x11.realestate.Agent\"6\n\x12\x43reateAgentRequest\x12 \n\x05\x61gent\x18\x01 \x01(\x0b\x32\x11.realestate.Agent\"7\n\x13\x43reateAgentResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"4\n\x0e\x61\x64\x64UserRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"M\n\x0f\x61\x64\x64UserResponse\x12\x16\n\x0estatus_message\x18\x01 \x01(\t\x12\x10\n\x08username\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\"4\n\x0egetUserRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"b\n\x0fgetUserResponse\x12\x16\n\x0estatus_message\x18\x01 \x01(\t\x12\x10\n\x08username\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\x12\x13\n\x0b\x63hatMessage\x18\x04 \x03(\t2\x81\x05\n\x11RealEstateService\x12W\n\x0eListProperties\x12!.realestate.ListPropertiesRequest\x1a\".realestate.ListPropertiesResponse\x12N\n\x0bGetProperty\x12\x1e.realestate.GetPropertyRequest\x1a\x1f.realestate.GetPropertyResponse\x12W\n\x0e\x43reateProperty\x12!.realestate.CreatePropertyRequest\x1a\".realestate.CreatePropertyResponse\x12K\n\nListAgents\x12\x1d.realestate.ListAgentsRequest\x1a\x1e.realestate.ListAgentsResponse\x12\x45\n\x08GetAgent\x12\x1b.realestate.GetAgentRequest\x1a\x1c.realestate.GetAgentResponse\x12N\n\x0b\x43reateAgent\x12\x1e.realestate.CreateAgentRequest\x1a\x1f.realestate.CreateAgentResponse\x12\x42\n\x07\x61\x64\x64User\x12\x1a.realestate.addUserRequest\x1a\x1b.realestate.addUserResponse\x12\x42\n\x07getUser\x12\x1a.realestate.getUserRequest\x1a\x1b.realestate.getUserResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11real_estate.proto\x12\nrealestate\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb6\x01\n\x08Property\x12\x13\n\x0bproperty_id\x18\x01 \x01(\t\x12\x15\n\rproperty_name\x18\x02 \x01(\t\x12\x15\n\rproperty_type\x18\x03 \x01(\t\x12\x15\n\rproperty_info\x18\x04 \x01(\t\x12\x18\n\x10price_lease_rent\x18\x05 \x01(\t\x12\x10\n\x08location\x18\x06 \x01(\t\x12\x12\n\nimage_path\x18\x07 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x08 \x01(\t\"\x17\n\x15ListPropertiesRequest\"B\n\x16ListPropertiesResponse\x12(\n\nproperties\x18\x01 \x03(\x0b\x32\x14.realestate.Property\")\n\x12GetPropertyRequest\x12\x13\n\x0bproperty_id\x18\x01 \x01(\t\"=\n\x13GetPropertyResponse\x12&\n\x08property\x18\x01 \x01(\x0b\x32\x14.realestate.Property\"?\n\x15\x43reatePropertyRequest\x12&\n\x08property\x18\x01 \x01(\x0b\x32\x14.realestate.Property\":\n\x16\x43reatePropertyResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"w\n\x05\x41gent\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x12\n\nagent_name\x18\x02 \x01(\t\x12\x12\n\nagent_info\x18\x03 \x01(\t\x12\x1a\n\x12\x61gent_contact_info\x18\x04 \x01(\t\x12\x18\n\x10\x61gent_image_path\x18\x05 \x01(\t\"\x13\n\x11ListAgentsRequest\"7\n\x12ListAgentsResponse\x12!\n\x06\x61gents\x18\x01 \x03(\x0b\x32\x11.realestate.Agent\"#\n\x0fGetAgentRequest\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\"4\n\x10GetAgentResponse\x12 \n\x05\x61gent\x18\x01 \x01(\x0b\x32\x11.realestate.Agent\"6\n\x12\x43reateAgentRequest\x12 \n\x05\x61gent\x18\x01 \x01(\x0b\x32\x11.realestate.Agent\"7\n\x13\x43reateAgentResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"4\n\x0e\x61\x64\x64UserRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"M\n\x0f\x61\x64\x64UserResponse\x12\x16\n\x0estatus_message\x18\x01 \x01(\t\x12\x10\n\x08username\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\"4\n\x0egetUserRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"b\n\x0fgetUserResponse\x12\x16\n\x0estatus_message\x18\x01 \x01(\t\x12\x10\n\x08username\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\x12\x13\n\x0b\x63hatMessage\x18\x04 \x03(\t\"1\n\x08\x43hatInfo\x12\x0f\n\x07\x63hat_id\x18\x01 \x01(\t\x12\x14\n\x0cparticipants\x18\x02 \x03(\t\"(\n\x14ListUserChatsRequest\x12\x10\n\x08username\x18\x01 \x01(\t\"<\n\x15ListUserChatsResponse\x12#\n\x05\x63hats\x18\x01 \x03(\x0b\x32\x14.realestate.ChatInfo\"Z\n\x0b\x43hatMessage\x12\x0e\n\x06sender\x18\x01 \x01(\t\x12\x0c\n\x04text\x18\x02 \x01(\t\x12-\n\ttimestamp\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"*\n\x17ListChatMessagesRequest\x12\x0f\n\x07\x63hat_id\x18\x01 \x01(\t\"E\n\x18ListChatMessagesResponse\x12)\n\x08messages\x18\x01 \x03(\x0b\x32\x17.realestate.ChatMessage\"O\n\x12SendMessageRequest\x12\x0f\n\x07\x63hat_id\x18\x01 \x01(\t\x12(\n\x07message\x18\x02 \x01(\x0b\x32\x17.realestate.ChatMessage\"=\n\x13SendMessageResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x15\n\rerror_message\x18\x02 \x01(\t2\x86\x07\n\x11RealEstateService\x12W\n\x0eListProperties\x12!.realestate.ListPropertiesRequest\x1a\".realestate.ListPropertiesResponse\x12N\n\x0bGetProperty\x12\x1e.realestate.GetPropertyRequest\x1a\x1f.realestate.GetPropertyResponse\x12W\n\x0e\x43reateProperty\x12!.realestate.CreatePropertyRequest\x1a\".realestate.CreatePropertyResponse\x12K\n\nListAgents\x12\x1d.realestate.ListAgentsRequest\x1a\x1e.realestate.ListAgentsResponse\x12\x45\n\x08GetAgent\x12\x1b.realestate.GetAgentRequest\x1a\x1c.realestate.GetAgentResponse\x12N\n\x0b\x43reateAgent\x12\x1e.realestate.CreateAgentRequest\x1a\x1f.realestate.CreateAgentResponse\x12\x42\n\x07\x61\x64\x64User\x12\x1a.realestate.addUserRequest\x1a\x1b.realestate.addUserResponse\x12\x42\n\x07getUser\x12\x1a.realestate.getUserRequest\x1a\x1b.realestate.getUserResponse\x12T\n\rListUserChats\x12 .realestate.ListUserChatsRequest\x1a!.realestate.ListUserChatsResponse\x12]\n\x10ListChatMessages\x12#.realestate.ListChatMessagesRequest\x1a$.realestate.ListChatMessagesResponse\x12N\n\x0bSendMessage\x12\x1e.realestate.SendMessageRequest\x1a\x1f.realestate.SendMessageResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'real_estate_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_PROPERTY']._serialized_start=34
-  _globals['_PROPERTY']._serialized_end=216
-  _globals['_LISTPROPERTIESREQUEST']._serialized_start=218
-  _globals['_LISTPROPERTIESREQUEST']._serialized_end=241
-  _globals['_LISTPROPERTIESRESPONSE']._serialized_start=243
-  _globals['_LISTPROPERTIESRESPONSE']._serialized_end=309
-  _globals['_GETPROPERTYREQUEST']._serialized_start=311
-  _globals['_GETPROPERTYREQUEST']._serialized_end=352
-  _globals['_GETPROPERTYRESPONSE']._serialized_start=354
-  _globals['_GETPROPERTYRESPONSE']._serialized_end=415
-  _globals['_CREATEPROPERTYREQUEST']._serialized_start=417
-  _globals['_CREATEPROPERTYREQUEST']._serialized_end=480
-  _globals['_CREATEPROPERTYRESPONSE']._serialized_start=482
-  _globals['_CREATEPROPERTYRESPONSE']._serialized_end=540
-  _globals['_AGENT']._serialized_start=542
-  _globals['_AGENT']._serialized_end=661
-  _globals['_LISTAGENTSREQUEST']._serialized_start=663
-  _globals['_LISTAGENTSREQUEST']._serialized_end=682
-  _globals['_LISTAGENTSRESPONSE']._serialized_start=684
-  _globals['_LISTAGENTSRESPONSE']._serialized_end=739
-  _globals['_GETAGENTREQUEST']._serialized_start=741
-  _globals['_GETAGENTREQUEST']._serialized_end=776
-  _globals['_GETAGENTRESPONSE']._serialized_start=778
-  _globals['_GETAGENTRESPONSE']._serialized_end=830
-  _globals['_CREATEAGENTREQUEST']._serialized_start=832
-  _globals['_CREATEAGENTREQUEST']._serialized_end=886
-  _globals['_CREATEAGENTRESPONSE']._serialized_start=888
-  _globals['_CREATEAGENTRESPONSE']._serialized_end=943
-  _globals['_ADDUSERREQUEST']._serialized_start=945
-  _globals['_ADDUSERREQUEST']._serialized_end=997
-  _globals['_ADDUSERRESPONSE']._serialized_start=999
-  _globals['_ADDUSERRESPONSE']._serialized_end=1076
-  _globals['_GETUSERREQUEST']._serialized_start=1078
-  _globals['_GETUSERREQUEST']._serialized_end=1130
-  _globals['_GETUSERRESPONSE']._serialized_start=1132
-  _globals['_GETUSERRESPONSE']._serialized_end=1230
-  _globals['_REALESTATESERVICE']._serialized_start=1233
-  _globals['_REALESTATESERVICE']._serialized_end=1874
+  _globals['_PROPERTY']._serialized_start=67
+  _globals['_PROPERTY']._serialized_end=249
+  _globals['_LISTPROPERTIESREQUEST']._serialized_start=251
+  _globals['_LISTPROPERTIESREQUEST']._serialized_end=274
+  _globals['_LISTPROPERTIESRESPONSE']._serialized_start=276
+  _globals['_LISTPROPERTIESRESPONSE']._serialized_end=342
+  _globals['_GETPROPERTYREQUEST']._serialized_start=344
+  _globals['_GETPROPERTYREQUEST']._serialized_end=385
+  _globals['_GETPROPERTYRESPONSE']._serialized_start=387
+  _globals['_GETPROPERTYRESPONSE']._serialized_end=448
+  _globals['_CREATEPROPERTYREQUEST']._serialized_start=450
+  _globals['_CREATEPROPERTYREQUEST']._serialized_end=513
+  _globals['_CREATEPROPERTYRESPONSE']._serialized_start=515
+  _globals['_CREATEPROPERTYRESPONSE']._serialized_end=573
+  _globals['_AGENT']._serialized_start=575
+  _globals['_AGENT']._serialized_end=694
+  _globals['_LISTAGENTSREQUEST']._serialized_start=696
+  _globals['_LISTAGENTSREQUEST']._serialized_end=715
+  _globals['_LISTAGENTSRESPONSE']._serialized_start=717
+  _globals['_LISTAGENTSRESPONSE']._serialized_end=772
+  _globals['_GETAGENTREQUEST']._serialized_start=774
+  _globals['_GETAGENTREQUEST']._serialized_end=809
+  _globals['_GETAGENTRESPONSE']._serialized_start=811
+  _globals['_GETAGENTRESPONSE']._serialized_end=863
+  _globals['_CREATEAGENTREQUEST']._serialized_start=865
+  _globals['_CREATEAGENTREQUEST']._serialized_end=919
+  _globals['_CREATEAGENTRESPONSE']._serialized_start=921
+  _globals['_CREATEAGENTRESPONSE']._serialized_end=976
+  _globals['_ADDUSERREQUEST']._serialized_start=978
+  _globals['_ADDUSERREQUEST']._serialized_end=1030
+  _globals['_ADDUSERRESPONSE']._serialized_start=1032
+  _globals['_ADDUSERRESPONSE']._serialized_end=1109
+  _globals['_GETUSERREQUEST']._serialized_start=1111
+  _globals['_GETUSERREQUEST']._serialized_end=1163
+  _globals['_GETUSERRESPONSE']._serialized_start=1165
+  _globals['_GETUSERRESPONSE']._serialized_end=1263
+  _globals['_CHATINFO']._serialized_start=1265
+  _globals['_CHATINFO']._serialized_end=1314
+  _globals['_LISTUSERCHATSREQUEST']._serialized_start=1316
+  _globals['_LISTUSERCHATSREQUEST']._serialized_end=1356
+  _globals['_LISTUSERCHATSRESPONSE']._serialized_start=1358
+  _globals['_LISTUSERCHATSRESPONSE']._serialized_end=1418
+  _globals['_CHATMESSAGE']._serialized_start=1420
+  _globals['_CHATMESSAGE']._serialized_end=1510
+  _globals['_LISTCHATMESSAGESREQUEST']._serialized_start=1512
+  _globals['_LISTCHATMESSAGESREQUEST']._serialized_end=1554
+  _globals['_LISTCHATMESSAGESRESPONSE']._serialized_start=1556
+  _globals['_LISTCHATMESSAGESRESPONSE']._serialized_end=1625
+  _globals['_SENDMESSAGEREQUEST']._serialized_start=1627
+  _globals['_SENDMESSAGEREQUEST']._serialized_end=1706
+  _globals['_SENDMESSAGERESPONSE']._serialized_start=1708
+  _globals['_SENDMESSAGERESPONSE']._serialized_end=1769
+  _globals['_REALESTATESERVICE']._serialized_start=1772
+  _globals['_REALESTATESERVICE']._serialized_end=2674
 # @@protoc_insertion_point(module_scope)

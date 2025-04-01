@@ -5,7 +5,7 @@ import warnings
 
 import real_estate_pb2 as real__estate__pb2
 
-GRPC_GENERATED_VERSION = '1.70.0'
+GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -26,7 +26,8 @@ if _version_not_supported:
 
 
 class RealEstateServiceStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service definition ----------------------------------
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -74,10 +75,26 @@ class RealEstateServiceStub(object):
                 request_serializer=real__estate__pb2.getUserRequest.SerializeToString,
                 response_deserializer=real__estate__pb2.getUserResponse.FromString,
                 _registered_method=True)
+        self.ListUserChats = channel.unary_unary(
+                '/realestate.RealEstateService/ListUserChats',
+                request_serializer=real__estate__pb2.ListUserChatsRequest.SerializeToString,
+                response_deserializer=real__estate__pb2.ListUserChatsResponse.FromString,
+                _registered_method=True)
+        self.ListChatMessages = channel.unary_unary(
+                '/realestate.RealEstateService/ListChatMessages',
+                request_serializer=real__estate__pb2.ListChatMessagesRequest.SerializeToString,
+                response_deserializer=real__estate__pb2.ListChatMessagesResponse.FromString,
+                _registered_method=True)
+        self.SendMessage = channel.unary_unary(
+                '/realestate.RealEstateService/SendMessage',
+                request_serializer=real__estate__pb2.SendMessageRequest.SerializeToString,
+                response_deserializer=real__estate__pb2.SendMessageResponse.FromString,
+                _registered_method=True)
 
 
 class RealEstateServiceServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service definition ----------------------------------
+    """
 
     def ListProperties(self, request, context):
         """Properties
@@ -99,7 +116,7 @@ class RealEstateServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def ListAgents(self, request, context):
-        """Agents (unused)
+        """Agents
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -118,13 +135,32 @@ class RealEstateServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def addUser(self, request, context):
-        """login
+        """Users
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def getUser(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListUserChats(self, request, context):
+        """NEW Chat RPC methods
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListChatMessages(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SendMessage(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -173,6 +209,21 @@ def add_RealEstateServiceServicer_to_server(servicer, server):
                     request_deserializer=real__estate__pb2.getUserRequest.FromString,
                     response_serializer=real__estate__pb2.getUserResponse.SerializeToString,
             ),
+            'ListUserChats': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListUserChats,
+                    request_deserializer=real__estate__pb2.ListUserChatsRequest.FromString,
+                    response_serializer=real__estate__pb2.ListUserChatsResponse.SerializeToString,
+            ),
+            'ListChatMessages': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListChatMessages,
+                    request_deserializer=real__estate__pb2.ListChatMessagesRequest.FromString,
+                    response_serializer=real__estate__pb2.ListChatMessagesResponse.SerializeToString,
+            ),
+            'SendMessage': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendMessage,
+                    request_deserializer=real__estate__pb2.SendMessageRequest.FromString,
+                    response_serializer=real__estate__pb2.SendMessageResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
             'realestate.RealEstateService', rpc_method_handlers)
@@ -182,7 +233,8 @@ def add_RealEstateServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class RealEstateService(object):
-    """Missing associated documentation comment in .proto file."""
+    """Service definition ----------------------------------
+    """
 
     @staticmethod
     def ListProperties(request,
@@ -390,6 +442,87 @@ class RealEstateService(object):
             '/realestate.RealEstateService/getUser',
             real__estate__pb2.getUserRequest.SerializeToString,
             real__estate__pb2.getUserResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListUserChats(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/realestate.RealEstateService/ListUserChats',
+            real__estate__pb2.ListUserChatsRequest.SerializeToString,
+            real__estate__pb2.ListUserChatsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListChatMessages(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/realestate.RealEstateService/ListChatMessages',
+            real__estate__pb2.ListChatMessagesRequest.SerializeToString,
+            real__estate__pb2.ListChatMessagesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SendMessage(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/realestate.RealEstateService/SendMessage',
+            real__estate__pb2.SendMessageRequest.SerializeToString,
+            real__estate__pb2.SendMessageResponse.FromString,
             options,
             channel_credentials,
             insecure,

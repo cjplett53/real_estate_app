@@ -1,11 +1,11 @@
 import grpc
 from concurrent import futures
 from google.cloud.firestore_v1 import FieldFilter
+from google.protobuf import timestamp_pb2
 import firebase_admin
 from firebase_admin import credentials, firestore
 import traceback
 import sys
-
 import real_estate_pb2
 import real_estate_pb2_grpc
 
@@ -23,8 +23,91 @@ except ValueError:
 
 db = firestore.client()
 
+def _generate_chat_id(userA, userB):
+    # Sort the two usernames alphabetically and join them with an underscore so the same chat doc is used for both directions of conversation
+    sorted_users = sorted([userA.lower().strip(), userB.lower().strip()])
+    return f"{sorted_users[0]}_{sorted_users[1]}"
+
 class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
-    # Retrieves all property documents from DB
+    def ListUserChats(self, request, context):
+        response = real_estate_pb2.ListUserChatsResponse()
+        try:
+            username = request.username.lower().strip()
+            # Query all chat docs that have this username in participants array
+            docs = db.collection("chats").where("participants", "array_contains", username).stream()
+            for doc in docs:
+                doc_dict = doc.to_dict()
+                chat_info = response.chats.add()
+                chat_info.chat_id = doc.id  # e.g. "bob_ladygaga"
+                if "participants" in doc_dict:
+                    for p in doc_dict["participants"]:
+                        chat_info.participants.append(p)
+        except Exception as e:
+            print("Error in ListUserChats:", e)
+            traceback.print_exc()
+        return response
+
+    def ListChatMessages(self, request, context):
+        response = real_estate_pb2.ListChatMessagesResponse()
+        try:
+            chat_id = request.chat_id.strip()
+            msgs_ref = (
+                db.collection("chats")
+                  .document(chat_id)
+                  .collection("messages")
+                  .order_by("timestamp")
+            )
+            msgs = msgs_ref.stream()
+            for m in msgs:
+                msg_dict = m.to_dict()
+                cm = response.messages.add()
+                cm.sender = msg_dict.get("sender", "")
+                cm.text = msg_dict.get("text", "")
+                fs_ts = msg_dict.get("timestamp", None)
+                if fs_ts:
+                    pb_ts = timestamp_pb2.Timestamp()
+                    pb_ts.FromDatetime(fs_ts)
+                    cm.timestamp.CopyFrom(pb_ts)
+        except Exception as e:
+            print("Error in ListChatMessages:", e)
+            traceback.print_exc()
+        return response
+
+    def SendMessage(self, request, context):
+        response = real_estate_pb2.SendMessageResponse(success=False, error_message="")
+        try:
+            chat_id = request.chat_id.strip()
+            sender = request.message.sender.strip()
+            text = request.message.text.strip()
+            if not chat_id or not sender or not text:
+                response.error_message = "Missing chat_id, sender or text"
+                return response
+
+            chat_ref = db.collection("chats").document(chat_id)
+            chat_doc = chat_ref.get()
+
+            if not chat_doc.exists:
+                # If doc doesn't exist create participants from chat_id
+                parts = chat_id.split("_")
+                data = {
+                    "participants": parts,
+                }
+                chat_ref.set(data)
+
+            msg_data = {
+                "sender": sender,
+                "text": text,
+                "timestamp": firestore.SERVER_TIMESTAMP
+            }
+            chat_ref.collection("messages").add(msg_data)
+
+            response.success = True
+        except Exception as e:
+            print("Error in SendMessage:", e)
+            traceback.print_exc()
+            response.error_message = str(e)
+        return response
+
     def ListProperties(self, request, context):
         response = real_estate_pb2.ListPropertiesResponse()
         try:
@@ -36,8 +119,6 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
                 prop.property_name = str(p.get("propertyName", ""))
                 prop.property_type = str(p.get("propertyType", ""))
                 prop.property_info = str(p.get("propertyInfo", ""))
-                
-                # Convert price to string
                 price_val = p.get("priceLeaseRent", 0)
                 prop.price_lease_rent = str(price_val)
                 prop.location = str(p.get("location", ""))
@@ -48,7 +129,6 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             traceback.print_exc()
         return response
 
-    # Retrieves a single property by ID
     def GetProperty(self, request, context):
         try:
             doc = db.collection("properties").document(request.property_id).get()
@@ -71,7 +151,6 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             traceback.print_exc()
             return real_estate_pb2.GetPropertyResponse()
 
-    # Creates properties and adds to DB (Need to add proper images and agent IDs)
     def CreateProperty(self, request, context):
         prop = request.property
         try:
@@ -100,7 +179,6 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             traceback.print_exc()
             return real_estate_pb2.CreatePropertyResponse(success=False, message=str(e))
 
-    # Retrieve agents from DB
     def ListAgents(self, request, context):
         response = real_estate_pb2.ListAgentsResponse()
         try:
@@ -118,12 +196,11 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             traceback.print_exc()
         return response
 
-    # Retrieve a single agent based on ID
     def GetAgent(self, request, context):
         try:
             doc = db.collection("agents").document(request.agent_id).get()
             if not doc.exists:
-                return real_estate_pb2.GetAgentResponse()
+                return real_estate_pb2.GetAgentResponse()  # empty
             a = doc.to_dict()
             agent_msg = real_estate_pb2.Agent(
                 agent_id=str(a.get("agentId", "")),
@@ -137,7 +214,6 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             print("Error in GetAgent:", e)
             traceback.print_exc()
             return real_estate_pb2.GetAgentResponse()
-
 
     def CreateAgent(self, request, context):
         ag = request.agent
@@ -171,34 +247,39 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             db.collection("users").add(new_user_data)
             return real_estate_pb2.addUserResponse(
                 status_message="User created successfully",
-                username=request.username,
+                username=request.username
             )
         except Exception as e:
+            print("Error in addUser:", e)
+            traceback.print_exc()
             return real_estate_pb2.addUserResponse(status_message="Error creating user.")
 
-    # return valid user upon login
     def getUser(self, request, context):
+        # If request.password == 'dummy', we only check existence
         docs = db.collection("users").where(filter=FieldFilter("username", "==", request.username)).get()
-
         if not docs:
             return real_estate_pb2.getUserResponse(status_message="Invalid credentials.")
 
         doc = docs[0].to_dict()
-        
-        if doc['username'] == request.username and request.password == doc['password']:
-            # Successful login
-            response = real_estate_pb2.getUserResponse(
-                username=request.username,
-                password=request.password,
-                chatMessage="",
-                status_message="Login Successful"
-            )
+        if doc['username'] == request.username:
+            # If password is 'dummy', we skip the actual password check
+            if request.password == "dummy":
+                return real_estate_pb2.getUserResponse(
+                    status_message="User exists",
+                    username=request.username
+                )
+            else:
+                # normal login check
+                if request.password == doc['password']:
+                    return real_estate_pb2.getUserResponse(
+                        username=request.username,
+                        password=request.password,
+                        status_message="Login Successful"
+                    )
+                else:
+                    return real_estate_pb2.getUserResponse(status_message="Invalid password.")
         else:
-            # Failed login
-            response = real_estate_pb2.getUserResponse(
-                status_message="Invalid password." 
-            )
-        return response
+            return real_estate_pb2.getUserResponse(status_message="Invalid credentials.")
 
 def gRPC_server():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

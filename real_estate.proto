@@ -2,6 +2,10 @@ syntax = "proto3";
 
 package realestate;
 
+// Import for Timestamp
+import "google/protobuf/timestamp.proto";
+
+// Existing Property messages
 message Property {
   string property_id = 1;
   string property_name = 2;
@@ -25,7 +29,6 @@ message GetPropertyResponse {
   Property property = 1;
 }
 
-// For creating or updating a property
 message CreatePropertyRequest {
   Property property = 1;
 }
@@ -34,7 +37,7 @@ message CreatePropertyResponse {
   string message = 2;
 }
 
-// Agents
+// Existing Agent messages
 message Agent {
   string agent_id = 1;
   string agent_name = 2;
@@ -63,39 +66,86 @@ message CreateAgentResponse {
   string message = 2;
 }
 
-// Users
-message addUserRequest{
+// Existing User messages
+message addUserRequest {
   string username = 1;
   string password = 2;
 }
-message addUserResponse{
+message addUserResponse {
   string status_message = 1;
   string username = 2;
   string password = 3;
 }
-message getUserRequest{
+message getUserRequest {
   string username = 1;
-  string password = 2;  
+  string password = 2;
 }
-message getUserResponse{
+message getUserResponse {
   string status_message = 1;
   string username = 2;
-  string password = 3;  
-  repeated string chatMessage = 4;
+  string password = 3;
+  repeated string chatMessage = 4; 
 }
 
+
+
+message ChatInfo {
+  string chat_id = 1;
+  repeated string participants = 2;
+}
+
+// Request/Response for listing all chats for a user
+message ListUserChatsRequest {
+  string username = 1;
+}
+message ListUserChatsResponse {
+  repeated ChatInfo chats = 1;
+}
+
+// Individual chat message with Firestore timestamp
+message ChatMessage {
+  string sender = 1;
+  string text = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+// Request/Response for listing messages in a chat
+message ListChatMessagesRequest {
+  string chat_id = 1;
+}
+message ListChatMessagesResponse {
+  repeated ChatMessage messages = 1;
+}
+
+// Request/Response for sending a new message to a chat
+message SendMessageRequest {
+  string chat_id = 1;
+  ChatMessage message = 2;
+}
+message SendMessageResponse {
+  bool success = 1;
+  string error_message = 2;
+}
+
+
 service RealEstateService {
+
   // Properties
   rpc ListProperties (ListPropertiesRequest) returns (ListPropertiesResponse);
   rpc GetProperty (GetPropertyRequest) returns (GetPropertyResponse);
   rpc CreateProperty (CreatePropertyRequest) returns (CreatePropertyResponse);
 
-  // Agents (unused)
+  // Agents
   rpc ListAgents (ListAgentsRequest) returns (ListAgentsResponse);
   rpc GetAgent (GetAgentRequest) returns (GetAgentResponse);
   rpc CreateAgent (CreateAgentRequest) returns (CreateAgentResponse);
 
-  // login
+  // Users
   rpc addUser(addUserRequest) returns (addUserResponse);
   rpc getUser(getUserRequest) returns (getUserResponse);
+
+  // NEW Chat RPC methods
+  rpc ListUserChats(ListUserChatsRequest) returns (ListUserChatsResponse);
+  rpc ListChatMessages(ListChatMessagesRequest) returns (ListChatMessagesResponse);
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
 }
