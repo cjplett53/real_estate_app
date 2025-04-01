@@ -8,9 +8,6 @@ def home_window(parent,user):
 
     parent.pack_propagate(False)
 
-    print("Test: ",user)
-
-
     # Load start image
     image_path = "start_image.jpg"
     try:
