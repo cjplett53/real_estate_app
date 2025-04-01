@@ -66,6 +66,12 @@ def sell_window(parent, stub):
     location_entry = ctk.CTkEntry(parent, placeholder_text="Location", width=200)
     location_entry.pack(pady=5)
 
+    #info txtbox
+    info_label = ctk.CTkLabel(parent, text="List any information about the property\n(# of rooms, # of washrooms, etc.)")
+    info_label.pack(pady=5)
+    info_entry = ctk.CTkTextbox(parent, width=400, height=100)
+    info_entry.pack(pady=5)
+
     # Dropdown for choosing "buy" or "rent"
     property_type_var = ctk.StringVar(value="buy")  # default to "buy"
     type_label = ctk.CTkLabel(parent, text="Property Type:")
@@ -85,6 +91,7 @@ def sell_window(parent, stub):
         prop_name = name_entry.get().strip()
         prop_price = price_entry.get().strip()
         location = location_entry.get().strip()
+        info = info_entry.get("1.0", ctk.END).strip()
         chosen_type = property_type_var.get().strip()  # "buy" or "rent"
 
         error_label.pack(pady=10)
@@ -129,7 +136,7 @@ def sell_window(parent, stub):
                 property_id=prop_id,
                 property_name=prop_name,
                 property_type=chosen_type,
-                property_info="",   # Need to add this
+                property_info=f"{info}",   # Need to add this
                 price_lease_rent=prop_price,
                 location=location,
                 image_path=f"{save_path}",      # image path - check how DB stores images
