@@ -128,6 +128,7 @@ def sign_in_window(parent, stub, update_user_callback):
         ))
         
         if response.username:
+            error_label.pack(pady=10)
             error_label.configure(text="Log-In Successful.", text_color="green")
             parent.after(500, lambda: update_user_callback(response))
         else:
