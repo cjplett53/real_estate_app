@@ -3,20 +3,21 @@ import real_estate_pb2
 import real_estate_pb2_grpc
 from google.protobuf import timestamp_pb2
 from functools import partial
-from datetime import datetime
+from datetime import datetime, timezone
 
 def message_window(parent, stub, current_user):
+    # Clear
     for widget in parent.winfo_children():
         widget.destroy()
-
     parent.pack_propagate(False)
 
+    # Title and input
     title_label = ctk.CTkLabel(parent, text="Message a User", font=("Arial Black", 20))
     title_label.pack(pady=20)
 
     user_label = ctk.CTkLabel(parent, text="Enter username or agent ID to message:")
     user_label.pack(pady=10)
-    user_entry = ctk.CTkEntry(parent, placeholder_text="e.g. bob or A001", width=200)
+    user_entry = ctk.CTkEntry(parent, placeholder_text="Username to message", width=200)
     user_entry.pack(pady=5)
 
     error_label = ctk.CTkLabel(parent, text="", text_color="red")
@@ -24,21 +25,26 @@ def message_window(parent, stub, current_user):
     error_label.pack_forget()
 
     def verify_account_exists(name):
-        name = name.strip()
-        if not name:
-            return (False, "Empty name")
+        name_stripped = name.strip()
+        if not name_stripped:
+            return (False, "Empty name", None)
 
-        # Try agent with uppercase
-        agent_resp = stub.GetAgent(real_estate_pb2.GetAgentRequest(agent_id=name.upper()))
+        # Attempt agent
+        agent_resp = stub.GetAgent(
+            real_estate_pb2.GetAgentRequest(agent_id=name_stripped.upper())
+        )
         if agent_resp.agent.agent_id:
             return (True, "agent", agent_resp.agent.agent_name)
 
-        # Try user (dummy password)
-        user_resp = stub.getUser(real_estate_pb2.getUserRequest(username=name, password="dummy"))
+        # Attempt user
+        user_resp = stub.getUser(
+            real_estate_pb2.getUserRequest(username=name_stripped, password="dummy")
+        )
         if user_resp.username:
             return (True, "user", user_resp.username)
 
-        return (False, "Account doesn't exist")
+        # Account doesn't exist
+        return (False, "Account doesn't exist", None)
 
     def open_new_chat():
         error_label.pack_forget()
@@ -46,23 +52,25 @@ def message_window(parent, stub, current_user):
         if not (target and current_user and current_user.username):
             return
 
-        verified = verify_account_exists(target)
-        if not verified[0]:
-            error_label.configure(text=verified[1], text_color="red")
+        found_ok, acct_type_or_err, displayName = verify_account_exists(target)
+        if not found_ok:
+            # Show the error in red text
+            error_label.configure(text=acct_type_or_err, text_color="red")
             error_label.pack(pady=5)
             return
 
-        acctType = verified[1]   # "agent" or "user"
-        displayName = verified[2]
-
-        sorted_users = sorted([current_user.username.lower(), target.lower()])
+        # Otherwise build a chat_id from me_lower, target_lower
+        me_lower = current_user.username.lower()
+        target_lower = target.lower()
+        sorted_users = sorted([me_lower, target_lower])
         chat_id = f"{sorted_users[0]}_{sorted_users[1]}"
-        chatroom_window(parent, stub, current_user, chat_id, acctType, displayName)
+
+        chatroom_window(parent, stub, current_user, chat_id, acct_type_or_err, displayName)
 
     open_button = ctk.CTkButton(parent, text="Open Chat", command=open_new_chat)
     open_button.pack(pady=10)
 
-    # Row of agents
+    # Row of agent buttons
     agent_frame = ctk.CTkFrame(parent)
     agent_frame.pack(fill="x", padx=10, pady=5)
 
@@ -70,10 +78,13 @@ def message_window(parent, stub, current_user):
     col_idx = 0
 
     def open_chat_with_agent(agent_id, agent_name):
-        if not current_user or not current_user.username:
+        if not (current_user and current_user.username):
             return
-        sorted_users = sorted([current_user.username.lower(), agent_id.lower()])
+        me_lower = current_user.username.lower()
+        a_lower = agent_id.lower()
+        sorted_users = sorted([me_lower, a_lower])
         chat_id = f"{sorted_users[0]}_{sorted_users[1]}"
+        # We already know it's an agent
         chatroom_window(parent, stub, current_user, chat_id, "agent", agent_name)
 
     for ag in agent_list_resp.agents:
@@ -89,39 +100,48 @@ def message_window(parent, stub, current_user):
         agent_btn.grid(row=0, column=col_idx, padx=5, pady=5)
         col_idx += 1
 
+    # List of existing chats
     list_frame = ctk.CTkScrollableFrame(parent, width=400, height=300)
     list_frame.pack(pady=20, fill="both", expand=True)
 
     if current_user and current_user.username:
-        resp = stub.ListUserChats(real_estate_pb2.ListUserChatsRequest(username=current_user.username))
+        resp_chats = stub.ListUserChats(
+            real_estate_pb2.ListUserChatsRequest(username=current_user.username)
+        )
         row_idx = 0
         me_lower = current_user.username.lower()
 
-        for chat_info in resp.chats:
+        for chat_info in resp_chats.chats:
             other_name = None
-            # If there are exactly 2 participants then find the other
             if len(chat_info.participants) == 2 and me_lower in [p.lower() for p in chat_info.participants]:
+                # find the other
                 for p in chat_info.participants:
                     if p.lower() != me_lower:
                         other_name = p
                         break
             else:
-                other_name = chat_info.chat_id  # fallback
+                other_name = None
 
-            # See if other_name is agent or user
+            # Figure out display text for the button
+            display_text = None
             if other_name:
-                # check agent, use uppercase to fit with DB agent instances
-                agent_resp = stub.GetAgent(real_estate_pb2.GetAgentRequest(agent_id=other_name.upper()))
+                # agent?
+                agent_resp = stub.GetAgent(
+                    real_estate_pb2.GetAgentRequest(agent_id=other_name.upper())
+                )
                 if agent_resp.agent.agent_id:
                     display_text = agent_resp.agent.agent_name
                 else:
-                    # check user
-                    user_resp = stub.getUser(real_estate_pb2.getUserRequest(username=other_name, password="dummy"))
+                    # user?
+                    user_resp = stub.getUser(
+                        real_estate_pb2.getUserRequest(username=other_name, password="dummy")
+                    )
                     if user_resp.username:
                         display_text = other_name
                     else:
-                        display_text = chat_info.chat_id
-            else:
+                        display_text = other_name
+            # If we can't find other => fallback to doc ID
+            if not display_text:
                 display_text = chat_info.chat_id
 
             chat_btn = ctk.CTkButton(
@@ -142,49 +162,56 @@ def chatroom_window(parent, stub, current_user, chat_id, acctType=None, displayN
         widget.destroy()
     parent.pack_propagate(False)
 
-    me = (current_user.username.lower() if current_user else "")
+    me_lower = (current_user.username.lower() if current_user else "")
     other = None
 
-    # Find the chat doc
-    all_chats = stub.ListUserChats(real_estate_pb2.ListUserChatsRequest(username=me))
+    # Query for the chat
+    all_chats_resp = stub.ListUserChats(
+        real_estate_pb2.ListUserChatsRequest(username=me_lower)
+    )
     chat_found = None
-    for cinfo in all_chats.chats:
+    for cinfo in all_chats_resp.chats:
         if cinfo.chat_id == chat_id:
             chat_found = cinfo
             break
 
-    if chat_found:
+    if chat_found and len(chat_found.participants) == 2:
         for p in chat_found.participants:
-            if p.lower() != me:
+            if p.lower() != me_lower:
                 other = p
                 break
 
-    # figure out title
-    chat_title = f"Chat: {chat_id}"  # fallback
+    chat_title = None
     if acctType and displayName:
+        # from open_new_chat or open_chat_with_agent
         chat_title = f"Chat with {displayName}"
     else:
         if other:
-            # check agent
-            agent_resp = stub.GetAgent(real_estate_pb2.GetAgentRequest(agent_id=other.upper()))
+            agent_resp = stub.GetAgent(
+                real_estate_pb2.GetAgentRequest(agent_id=other.upper())
+            )
             if agent_resp.agent.agent_id:
                 chat_title = f"Chat with {agent_resp.agent.agent_name}"
             else:
-                # check user
-                user_resp = stub.getUser(real_estate_pb2.getUserRequest(username=other, password="dummy"))
+                # user
+                user_resp = stub.getUser(
+                    real_estate_pb2.getUserRequest(username=other, password="dummy")
+                )
                 if user_resp.username:
                     chat_title = f"Chat with {other}"
+                else:
+                    chat_title = f"Chat with {other}"
+
+    if not chat_title:
+        chat_title = f"Chat: {chat_id}"
 
     title_label = ctk.CTkLabel(parent, text=chat_title, font=("Arial Black", 24))
     title_label.pack(pady=10)
 
-    # "Back to Messages" button
     def go_back_to_messages():
         from screens.message import message_window
-        # Clear the window
         for w in parent.winfo_children():
             w.destroy()
-        # Re-show the messaging screen
         message_window(parent, stub, current_user)
 
     back_btn = ctk.CTkButton(parent, text="Back to Messages", command=go_back_to_messages)
@@ -196,12 +223,21 @@ def chatroom_window(parent, stub, current_user, chat_id, acctType=None, displayN
     chat_text = ctk.CTkTextbox(chat_frame, wrap="word")
     chat_text.pack(expand=True, fill="both", padx=10, pady=10)
 
-    # Load existing messages
+    # Load messages
     try:
-        resp = stub.ListChatMessages(real_estate_pb2.ListChatMessagesRequest(chat_id=chat_id))
-        for msg in resp.messages:
-            dt = msg.timestamp.ToDatetime() if msg.timestamp.seconds != 0 else None
-            dt_str = dt.strftime("%Y-%m-%d %H:%M:%S") if dt else ""
+        msgs_resp = stub.ListChatMessages(
+            real_estate_pb2.ListChatMessagesRequest(chat_id=chat_id)
+        )
+        for msg in msgs_resp.messages:
+            dt_utc = msg.timestamp.ToDatetime() if msg.timestamp.seconds != 0 else None
+            if dt_utc:
+                # Force to UTC if naive
+                if dt_utc.tzinfo is None:
+                    dt_utc = dt_utc.replace(tzinfo=timezone.utc)
+                dt_local = dt_utc.astimezone()
+                dt_str = dt_local.strftime("%Y-%m-%d %H:%M:%S")
+            else:
+                dt_str = "UnknownTime"
             line = f"[{dt_str}] {msg.sender}: {msg.text}\n"
             chat_text.insert("end", line)
         chat_text.see("end")
@@ -216,14 +252,15 @@ def chatroom_window(parent, stub, current_user, chat_id, acctType=None, displayN
 
     def send_msg():
         txt = msg_entry.get().strip()
-        if not txt or not current_user or not current_user.username:
+        if not txt:
             return
         new_msg = real_estate_pb2.ChatMessage(sender=current_user.username, text=txt)
         send_req = real_estate_pb2.SendMessageRequest(chat_id=chat_id, message=new_msg)
         send_resp = stub.SendMessage(send_req)
         if send_resp.success:
-            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            chat_text.insert("end", f"[{now_str}] {current_user.username}: {txt}\n")
+            local_now = datetime.now().astimezone()
+            dt_str = local_now.strftime("%Y-%m-%d %H:%M:%S")
+            chat_text.insert("end", f"[{dt_str}] {current_user.username}: {txt}\n")
             chat_text.see("end")
             msg_entry.delete(0, "end")
 

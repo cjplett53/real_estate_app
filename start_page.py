@@ -44,12 +44,16 @@ def main():
     nav_bar_signed_in = ctk.CTkFrame(nav_container, width=100, fg_color="black")
 
     def create_nav_buttons(nav_frame, is_logged_in):
+
+        # Commented out since it does nothing
+        """
         hide_button = ctk.CTkButton(
             nav_frame, text="<<<", corner_radius=10, width=100, height=20,
             fg_color="#ff8c69", hover_color="#ffa07a", text_color="black"
         )
         hide_button.pack(padx=5, pady=5)
-
+        """
+      
         home_button = ctk.CTkButton(
             nav_frame, text="Home", corner_radius=10, width=100, height=40,
             fg_color="#ff8c69", hover_color="#ffa07a", text_color="black",

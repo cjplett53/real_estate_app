@@ -24,7 +24,7 @@ except ValueError:
 db = firestore.client()
 
 def _generate_chat_id(userA, userB):
-    # Sort the two usernames alphabetically and join them with an underscore so the same chat doc is used for both directions of conversation
+    # Sort the two usernames alphabetically and join them with an underscore
     sorted_users = sorted([userA.lower().strip(), userB.lower().strip()])
     return f"{sorted_users[0]}_{sorted_users[1]}"
 
@@ -33,12 +33,11 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
         response = real_estate_pb2.ListUserChatsResponse()
         try:
             username = request.username.lower().strip()
-            # Query all chat docs that have this username in participants array
             docs = db.collection("chats").where("participants", "array_contains", username).stream()
             for doc in docs:
                 doc_dict = doc.to_dict()
                 chat_info = response.chats.add()
-                chat_info.chat_id = doc.id  # e.g. "bob_ladygaga"
+                chat_info.chat_id = doc.id
                 if "participants" in doc_dict:
                     for p in doc_dict["participants"]:
                         chat_info.participants.append(p)
@@ -87,8 +86,10 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             chat_doc = chat_ref.get()
 
             if not chat_doc.exists:
-                # If doc doesn't exist create participants from chat_id
-                parts = chat_id.split("_")
+                # doc doesn't exist -> create a new participants array
+                parts = chat_id.split("_")  # e.g. ['bob','dilpreet']
+                # ensure all-lowercase/stripped
+                parts = [p.lower().strip() for p in parts]
                 data = {
                     "participants": parts,
                 }
@@ -97,7 +98,7 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             msg_data = {
                 "sender": sender,
                 "text": text,
-                "timestamp": firestore.SERVER_TIMESTAMP
+                "timestamp": firestore.SERVER_TIMESTAMP  # store in UTC
             }
             chat_ref.collection("messages").add(msg_data)
 
@@ -200,7 +201,7 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
         try:
             doc = db.collection("agents").document(request.agent_id).get()
             if not doc.exists:
-                return real_estate_pb2.GetAgentResponse()  # empty
+                return real_estate_pb2.GetAgentResponse()
             a = doc.to_dict()
             agent_msg = real_estate_pb2.Agent(
                 agent_id=str(a.get("agentId", "")),
@@ -255,14 +256,12 @@ class RealEstateServiceServicer(real_estate_pb2_grpc.RealEstateServiceServicer):
             return real_estate_pb2.addUserResponse(status_message="Error creating user.")
 
     def getUser(self, request, context):
-        # If request.password == 'dummy', we only check existence
         docs = db.collection("users").where(filter=FieldFilter("username", "==", request.username)).get()
         if not docs:
             return real_estate_pb2.getUserResponse(status_message="Invalid credentials.")
 
         doc = docs[0].to_dict()
         if doc['username'] == request.username:
-            # If password is 'dummy', we skip the actual password check
             if request.password == "dummy":
                 return real_estate_pb2.getUserResponse(
                     status_message="User exists",

@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 import app_globals
 
 def buy_window(parent, stub):
+    # Clear existing content
     for widget in parent.winfo_children():
         widget.destroy()
 
@@ -51,7 +52,6 @@ def buy_window(parent, stub):
         info_label = ctk.CTkLabel(frame, text=info_str, justify="left")
         info_label.pack(side="left", padx=10, pady=5)
 
-        # If this property has an agent then show a "Message [Agent]" button
         agent_id = prop.agent_id.strip()
         if agent_id:
             get_agent_req = real_estate_pb2.GetAgentRequest(agent_id=agent_id)
@@ -59,18 +59,21 @@ def buy_window(parent, stub):
             agent_name = agent_resp.agent.agent_name if agent_resp.agent.agent_id else agent_id
 
             def open_chat_with_agent(aid, aname):
-                if not app_globals.is_user_logged_in or not app_globals.current_user or not app_globals.current_user.username:
+                # Must be logged in
+                if not (app_globals.is_user_logged_in and app_globals.current_user and app_globals.current_user.username):
                     return
+
                 sorted_users = sorted([app_globals.current_user.username.lower(), aid.lower()])
                 chat_id = f"{sorted_users[0]}_{sorted_users[1]}"
+
+                for w in parent.winfo_children():
+                    w.destroy()
+
                 from screens.message import message_window, chatroom_window
-                # close current window
-                parent.pack_forget()
-                parent.destroy()
-                # open main messaging window
-                message_window(parent.master, stub, app_globals.current_user)
-                # forcibly open the chat
-                chatroom_window(parent.master, stub, app_globals.current_user, chat_id, "agent", aname)
+                # Show the main messaging screen in the same parent
+                message_window(parent, stub, app_globals.current_user)
+                # Then forcibly open the chat window
+                chatroom_window(parent, stub, app_globals.current_user, chat_id, "agent", aname)
 
             msg_btn_text = f"Message {agent_name}"
             msg_btn = ctk.CTkButton(
@@ -82,6 +85,6 @@ def buy_window(parent, stub):
                 hover_color="#ffa07a",
                 text_color="black",
                 command=lambda agid=agent_id, aname=agent_name: open_chat_with_agent(agid, aname),
-                state="normal" if (app_globals.is_user_logged_in and app_globals.current_user and app_globals.current_user.username) else "disabled"
+                state="normal" if (app_globals.is_user_logged_in and app_globals.current_user) else "disabled"
             )
             msg_btn.pack(side="left", padx=10, pady=5)
