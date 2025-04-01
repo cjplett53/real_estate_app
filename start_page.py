@@ -1,12 +1,12 @@
 import customtkinter as ctk
 from PIL import Image, ImageTk
-from windows import home_window
-from buy import buy_window
-from rent import rent_window
-from sell import sell_window
-from sign_in import sign_in_window  
-from message import message_window
-from map_window import map_window
+from screens.home import home_window
+from screens.buy import buy_window
+from screens.rent import rent_window
+from screens.sell import sell_window
+from screens.sign_in import sign_in_window  
+from screens.message import message_window
+from screens.map_window import map_window
 
 import grpc
 import real_estate_pb2

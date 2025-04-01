@@ -7,21 +7,14 @@ import math
 from PIL import Image, ImageTk
 
 def map_window(parent, stub, lat=None, lon=None):
-    
-    # Create window
-    win = ctk.CTkToplevel(parent)
-    win.title("Map - Toronto")
-    win.geometry("1200x800")
 
-    # Ensure the window appears on top and gets focus
-    win.transient(parent)
-    win.grab_set()
-    win.lift(parent)
-    win.focus_force()
+    # Clear parent frame
+    for widget in parent.winfo_children():
+        widget.destroy()
 
     # Create the tkintermapview widget
     map_widget = tkintermapview.TkinterMapView(
-        win, width=1200, height=800, corner_radius=0
+        parent, width=1200, height=800, corner_radius=0
     )
     map_widget.pack(fill="both", expand=True)
 
@@ -52,7 +45,7 @@ def map_window(parent, stub, lat=None, lon=None):
 
     # create an info pop-up (set to when a marker is hovered)
     def open_info_popup(prop):
-        info_win = ctk.CTkToplevel(win)
+        info_win = ctk.CTkToplevel(parent)
         info_win.title("Property Info")
         info_win.geometry("300x150")
         info_frame = ctk.CTkFrame(info_win)
@@ -74,7 +67,7 @@ def map_window(parent, stub, lat=None, lon=None):
         if hover_popup is not None:
             hover_popup.destroy()
 
-        hover_popup = ctk.CTkToplevel(win)
+        hover_popup = ctk.CTkToplevel(parent)
         hover_popup.overrideredirect(True)
 
         x = event.x_root + 10
