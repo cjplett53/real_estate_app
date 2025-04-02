@@ -253,7 +253,7 @@ def chatroom_window(parent, stub, current_user, chat_id, acctType=None, displayN
     def poll_for_new_messages():
         if parent.winfo_exists():
             load_new_messages()
-            parent.after(250, poll_for_new_messages)
+            parent.after(500, poll_for_new_messages)
 
     # Initial load + start polling
     load_new_messages()
